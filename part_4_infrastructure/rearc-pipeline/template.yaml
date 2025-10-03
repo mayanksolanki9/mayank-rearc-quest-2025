@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  rearc-pipeline
+
+  A serverless pipeline to process data uploaded to S3.
+
+Parameters:
+  S3BucketName:
+    Type: String
+    Description: The name of the S3 bucket containing the data.
+
+Resources:
+  DataProcessingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: rearc-data-processing-queue
+      VisibilityTimeout: 65
+
+  AnalyticsLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: analytics_lambda/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.9
+      Timeout: 60
+      MemorySize: 256
+      Policies:
+        # Give the Lambda permission to read from the S3 bucket
+        - S3ReadPolicy:
+            BucketName: !Ref S3BucketName
+        # Give the Lambda permission to read messages from the SQS queue
+        - SQSPollerPolicy:
+            QueueName: !GetAtt DataProcessingQueue.QueueName
+      Events:
+        # Tell the Lambda to trigger on messages from the SQS queue
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt DataProcessingQueue.Arn
+            BatchSize: 1
+
+  # This policy allows S3 to send messages to our SQS queue
+  S3toSQSPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: "s3.amazonaws.com"
+            Action: "SQS:SendMessage"
+            Resource: !GetAtt DataProcessingQueue.Arn
+            Condition:
+              ArnLike:
+                "aws:SourceArn": !Sub "arn:aws:s3:::${S3BucketName}"
+      Queues:
+        - !Ref DataProcessingQueue
+
+Outputs:
+  QueueURL:
+    Description: "URL of the SQS Queue"
+    Value: !Ref DataProcessingQueue
+  LambdaFunctionName:
+    Description: "Analytics Lambda Function Name"
+    Value: !Ref AnalyticsLambdaFunction
