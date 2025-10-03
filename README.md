@@ -55,7 +55,7 @@ The serverless pipeline is defined in the `part_4_infrastructure/rearc-pipeline/
 
 ### Successful Deployment Confirmation
 
-![Successful SAM Deployment]
+![Successful SAM Deployment] https://github.com/mayanksolanki9/mayank-rearc-quest-2025/blob/cb192e1a8f951e0d704028300415565392a5f624/images/sam-deploy-sucess.png
 
 ## Submission Links
 
