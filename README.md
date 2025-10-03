@@ -47,13 +47,15 @@ The serverless pipeline is defined in the `part_4_infrastructure/rearc-pipeline/
 3.  Deploy the pipeline: `sam deploy --guided`
     * You will be prompted to enter the S3 bucket name during deployment.
 
----
 
 ## Notes and Challenges
 
 * **Part 1:** Successfully handled the `403 Forbidden` error from the BLS website by setting a valid `User-Agent` header. Implemented logic to prevent re-uploading unchanged files.
 
----
+
+### Successful Deployment Confirmation
+
+![Successful SAM Deployment]
 
 ## Submission Links
 
